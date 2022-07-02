@@ -33,7 +33,7 @@ class User(object):
         db = sqlite3.Connection("data.db")
         cursor = db.cursor()
         query = "SELECT * FROM users WHERE id=?"
-        result = cursor.execute(query, (id, ))
+        result = cursor.execute(query, (_id, ))
         row = result.fetchone()
         if row :
             user = cls(*row)
