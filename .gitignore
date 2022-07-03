@@ -1,6 +1,7 @@
 ### owner ###
 test_apps
 venv
+data.db
 ### Flask ###
 instance/*
 !instance/.gitignore
