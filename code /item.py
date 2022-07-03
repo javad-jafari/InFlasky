@@ -1,6 +1,6 @@
 import  sqlite3
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt import jwt_required, current_identity
 
 
 
@@ -30,7 +30,7 @@ class Item(Resource):
         if row:
             return {"item" : {"name":row[1],  "price":row[2]}}
 
-
+    @jwt_required()
     def get(self, name):
 
         item = self.find_by_name(name)
@@ -38,11 +38,8 @@ class Item(Resource):
             return item, 200
         return {"message" : "item is not exist"}, 404
 
-    def post(self, name):
-
-        if self.find_by_name(name):
-            return {"message" : "item is alread exist"}
-
+    @classmethod
+    def insert_item(cls, name):
         data = Item.parser.parse_args()
 
         db = sqlite3.Connection("data.db")
@@ -53,5 +50,32 @@ class Item(Resource):
         cursor.execute(query, (name, data["price"]))
         db.commit()
         db.close()
-        return {"message": f"item {name} , price : {data['price']} create"}, 201
 
+    def post(self, name):
+
+        if self.find_by_name(name):
+            return {"message" : "item is alread exist"}
+
+        try:
+            self.insert_item(name)
+        except:
+
+            return {"message": "An error occured in inserting item"}
+
+        return {"message": f"item {name}  create"}, 201
+
+
+    def delete(self, name):
+
+        if self.find_by_name(name) is None:
+            return {"message" : "item is not exist to delete"}
+
+
+        db = sqlite3.Connection("data.db")
+        cursor = db.cursor()
+
+        query= "delete from items where name=?"
+        
+        cursor.execute(query, (name, ))
+        db.commit()
+        db.close()

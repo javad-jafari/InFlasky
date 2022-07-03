@@ -28,5 +28,4 @@ def protected():
 api.add_resource(UserRegister, "/signup")
 api.add_resource(Item, "/item/<string:name>")
 
-
 app.run(debug=True)
