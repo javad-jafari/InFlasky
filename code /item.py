@@ -14,8 +14,8 @@ class Item(Resource):
     help="this is required !"    
     )
 
-
-    def get(self, name):
+    @classmethod
+    def find_by_name(cls, name):
 
         db = sqlite3.Connection("data.db")
         cursor = db.cursor()
@@ -29,9 +29,19 @@ class Item(Resource):
 
         if row:
             return {"item" : {"name":row[1],  "price":row[2]}}
-        return {"message" : "item is not exist"}
+
+
+    def get(self, name):
+
+        item = self.find_by_name(name)
+        if item:
+            return item, 200
+        return {"message" : "item is not exist"}, 404
 
     def post(self, name):
+
+        if self.find_by_name(name):
+            return {"message" : "item is alread exist"}
 
         data = Item.parser.parse_args()
 
