@@ -51,16 +51,17 @@ class Item(Resource):
         db.commit()
         db.close()
 
+
     def post(self, name):
 
         if self.find_by_name(name):
-            return {"message" : "item is alread exist"}
+            return {"message" : "item is alread exist"},409
 
         try:
             self.insert_item(name)
         except:
 
-            return {"message": "An error occured in inserting item"}
+            return {"message": "An error occured in inserting item"},500
 
         return {"message": f"item {name}  create"}, 201
 
@@ -79,3 +80,40 @@ class Item(Resource):
         cursor.execute(query, (name, ))
         db.commit()
         db.close()
+    
+    def put(self, name):
+
+        data = Item.parser.parse_args()
+        update_item = {"name":name, "price":data["price"]}
+        if self.find_by_name(name):
+        
+            try:
+                self.update_item(**update_item)
+
+            except:
+                return {"message":"An error occured in updating item"}        
+        
+        
+        try:
+            self.insert_item(name)
+        except:
+            return {"message":"An error occured in inserting item?"}
+
+
+
+
+        return update_item, 200
+
+
+    @classmethod
+    def update_item(cls, name, price):
+
+        db = sqlite3.Connection("data.db")
+        cursor = db.cursor()
+
+        query= "update items set price=? where name=?"
+        
+        cursor.execute(query, (price, name))
+        db.commit()
+        db.close()
+    
